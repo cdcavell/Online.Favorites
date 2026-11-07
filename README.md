@@ -4,9 +4,12 @@ A personal start page of favorite sites, served at **https://localhost**. It's a
 Customizable.Menu with a much smaller footprint:
 
 - **No IIS.** Kestrel runs as a Windows service and listens on `https://localhost` (loopback only).
-- **No JavaScript.** There are no scripts and no client libraries. The Content-Security-Policy blocks
-  scripts outright. Accordions are `<details>`, delete confirmations are native popovers, page changes
-  cross-fade with CSS view transitions, and every edit is a plain form post.
+- **No JavaScript on the menu, and no client libraries anywhere.** The menu's Content-Security-Policy
+  blocks scripts outright. Accordions are `<details>`, delete confirmations are native popovers, page
+  changes cross-fade with CSS view transitions, and every edit is a plain form post.
+- **Configure saves as you go.** The only script is `wwwroot/js/configure.js` (about 15 lines,
+  Configure page only). It saves a row when focus leaves it after a change. Pressing Enter in a field
+  also saves, even without the script.
 - **Fast menu.** Each menu page is rendered once and then served from memory (ASP.NET Core output
   cache). Any change on Configure clears the cached pages. Static files are fingerprinted, compressed
   and cached by the browser.

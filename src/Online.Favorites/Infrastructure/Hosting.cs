@@ -60,17 +60,22 @@ internal static class LocalhostCertificate
 
 internal static class SecurityHeaders
 {
-    // No script-src: the browser refuses to run any JavaScript on these pages.
+    // No script-src: the browser refuses to run any JavaScript on the menu.
     // form-action allows https: so the prompt box can open an AI assistant with the question.
     private const string ContentSecurityPolicy =
         "default-src 'none'; style-src 'self'; img-src 'self'; " +
         "form-action 'self' https:; frame-ancestors 'none'; base-uri 'none'";
 
+    // Configure alone may load its one same-origin file, js/configure.js (save on leaving a row).
+    private const string ConfigureContentSecurityPolicy = ContentSecurityPolicy + "; script-src 'self'";
+
     public static IApplicationBuilder UseSecurityHeaders(this IApplicationBuilder app) =>
         app.Use((context, next) =>
         {
             var headers = context.Response.Headers;
-            headers.ContentSecurityPolicy = ContentSecurityPolicy;
+            headers.ContentSecurityPolicy = context.Request.Path.StartsWithSegments("/Configure", StringComparison.OrdinalIgnoreCase)
+                ? ConfigureContentSecurityPolicy
+                : ContentSecurityPolicy;
             headers.XContentTypeOptions = "nosniff";
             headers["Referrer-Policy"] = "no-referrer";
             headers["Cross-Origin-Opener-Policy"] = "same-origin";

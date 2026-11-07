@@ -23,11 +23,11 @@
                 <span class="count">@category.Sites.Count @(category.Sites.Count == 1 ? "site" : "sites")</span>
             </summary>
 
-            <form method="post" class="row">
+            <form method="post" class="row" data-autosave>
                 <input type="hidden" name="id" value="@category.Id" />
                 <input type="hidden" name="c" value="@category.Id" />
                 <input name="name" value="@category.Name" required maxlength="@Category.NameMaxLength" aria-label="Category name" />
-                <button class="icon-btn" asp-page-handler="RenameCategory" title="Save name">@Icon.Use("check")</button>
+                <button class="default-submit" asp-page-handler="RenameCategory" tabindex="-1" aria-hidden="true">Save</button>
                 <button class="icon-btn" asp-page-handler="MoveCategory" name="delta" value="-1" formnovalidate title="Move up">@Icon.Use("up")</button>
                 <button class="icon-btn" asp-page-handler="MoveCategory" name="delta" value="1" formnovalidate title="Move down">@Icon.Use("down")</button>
                 <button class="icon-btn" type="button" popovertarget="del-c-@category.Id" title="Delete category">@Icon.Use("trash")</button>
@@ -50,12 +50,12 @@
                             <span class="count">@string.Join(" · ", site.Links.Select(l => l.Environment))</span>
                         </summary>
 
-                        <form method="post" class="row">
+                        <form method="post" class="row" data-autosave>
                             <input type="hidden" name="id" value="@site.Id" />
                             <input type="hidden" name="c" value="@category.Id" />
                             <input type="hidden" name="s" value="@site.Id" />
                             <input name="name" value="@site.Name" required maxlength="@Site.NameMaxLength" aria-label="Site name" />
-                            <button class="icon-btn" asp-page-handler="RenameSite" title="Save name">@Icon.Use("check")</button>
+                            <button class="default-submit" asp-page-handler="RenameSite" tabindex="-1" aria-hidden="true">Save</button>
                             <button class="icon-btn" asp-page-handler="MoveSite" name="delta" value="-1" formnovalidate title="Move up">@Icon.Use("up")</button>
                             <button class="icon-btn" asp-page-handler="MoveSite" name="delta" value="1" formnovalidate title="Move down">@Icon.Use("down")</button>
                             <button class="icon-btn" type="button" popovertarget="del-s-@site.Id" title="Delete site">@Icon.Use("trash")</button>
@@ -68,14 +68,14 @@
 
                         @foreach (var link in site.Links)
                         {
-                            <form method="post" class="row link">
+                            <form method="post" class="row link" data-autosave>
                                 <input type="hidden" name="siteId" value="@site.Id" />
                                 <input type="hidden" name="environment" value="@link.Environment" />
                                 <input type="hidden" name="c" value="@category.Id" />
                                 <input type="hidden" name="s" value="@site.Id" />
                                 <span class="env-label">@link.Environment</span>
                                 <input name="url" type="url" value="@link.Url" required maxlength="@SiteLink.UrlMaxLength" aria-label="@link.Environment URL" />
-                                <button class="icon-btn" asp-page-handler="SaveLink" title="Save URL">@Icon.Use("check")</button>
+                                <button class="default-submit" asp-page-handler="SaveLink" tabindex="-1" aria-hidden="true">Save</button>
                                 <button class="icon-btn" asp-page-handler="DeleteLink" name="id" value="@link.Id" formnovalidate title="Remove @link.Environment link">@Icon.Use("trash")</button>
                             </form>
                         }
@@ -120,18 +120,19 @@
         <p class="hint">
             Icons are SVG files in <code>wwwroot/icons/assistants</code>.
             “Prompt” means the site accepts <code>?q=</code>, so the ask box can pass your question.
+            Changes save when you leave the row.
         </p>
 
         @foreach (var assistant in Model.QuickLinks)
         {
-            <form method="post" class="row assistant">
+            <form method="post" class="row assistant" data-autosave>
                 <input type="hidden" name="id" value="@assistant.Id" />
                 <img src="/icons/assistants/@assistant.Icon" alt="" width="24" height="24" />
                 <input name="name" value="@assistant.Name" required maxlength="@QuickLink.NameMaxLength" aria-label="Name" />
                 <input name="url" type="url" value="@assistant.Url" required maxlength="@SiteLink.UrlMaxLength" aria-label="URL" />
                 <input name="icon" value="@assistant.Icon" required maxlength="@QuickLink.IconMaxLength" pattern="[a-z0-9][a-z0-9\-]*\.svg" aria-label="Icon file" />
                 <label class="check"><input type="checkbox" name="acceptsPrompt" value="true" checked="@assistant.AcceptsPrompt" /> Prompt</label>
-                <button class="icon-btn" asp-page-handler="SaveAssistant" title="Save">@Icon.Use("check")</button>
+                <button class="default-submit" asp-page-handler="SaveAssistant" tabindex="-1" aria-hidden="true">Save</button>
                 <button class="icon-btn" asp-page-handler="MoveAssistant" name="delta" value="-1" formnovalidate title="Move up">@Icon.Use("up")</button>
                 <button class="icon-btn" asp-page-handler="MoveAssistant" name="delta" value="1" formnovalidate title="Move down">@Icon.Use("down")</button>
                 <button class="icon-btn" asp-page-handler="DeleteAssistant" formnovalidate title="Remove">@Icon.Use("trash")</button>
@@ -148,3 +149,7 @@
         </form>
     </details>
 </section>
+
+@section Scripts {
+    <script src="~/js/configure.js" asp-append-version="true" defer></script>
+}
