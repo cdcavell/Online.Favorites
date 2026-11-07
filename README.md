@@ -106,3 +106,7 @@ background.
 
 The jackdaw background and logo come from Customizable.Menu. The background is resized to a 100 KB
 WebP. The look is recreated in `site.css`, and none of the Kitzu template's files are used.
+
+## License
+
+[MIT](LICENSE)
