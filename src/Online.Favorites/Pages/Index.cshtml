@@ -1,0 +1,33 @@
+@page "/{id:int?}"
+@model IndexModel
+
+<section class="panel" aria-label="@(Model.Category?.Name ?? "Favorites")">
+    @if (Model.Category is null)
+    {
+        <p class="empty">No favorites yet. <a href="/Configure">Add a category</a> to get started.</p>
+    }
+    else if (Model.Category.Sites.Count == 0)
+    {
+        <p class="empty">@Model.Category.Name has no sites yet. <a href="/Configure?c=@Model.Category.Id#c-@Model.Category.Id">Add one</a>.</p>
+    }
+    else
+    {
+        @foreach (var site in Model.Category.Sites)
+        {
+            @* name="sites" makes this an exclusive accordion: opening one closes the others. *@
+            <details class="site" name="sites">
+                <summary>@site.Name</summary>
+                <div class="site-links">
+                    @foreach (var link in site.Links)
+                    {
+                        <a class="env-link" href="@link.Url">@link.Environment</a>
+                    }
+                    @if (site.Links.Count == 0)
+                    {
+                        <span class="muted">No links yet</span>
+                    }
+                </div>
+            </details>
+        }
+    }
+</section>

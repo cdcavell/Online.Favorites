@@ -1,0 +1,86 @@
+﻿@using Online.Favorites.Pages
+@{
+    var shell = ViewData.Model as ShellPageModel;
+    var title = shell?.Title ?? "Online Favorites";
+    var categories = shell?.Categories ?? [];
+    var assistants = shell?.QuickLinks ?? [];
+    var promptTarget = assistants.FirstOrDefault(a => a.AcceptsPrompt);
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="color-scheme" content="dark" />
+    <title>@title</title>
+    <link rel="icon" href="~/img/favicon.ico" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <img class="backdrop" src="~/img/jackdaw.webp" asp-append-version="true" alt="" fetchpriority="high" />
+
+    <header class="topbar">
+        <a class="brand" href="@(shell?.IsConfigure == true ? "/Configure" : "/")">
+            <img src="~/img/logo.png" asp-append-version="true" alt="" width="32" height="32" />
+            <span>@title</span>
+        </a>
+        <nav class="toplinks" aria-label="Site">
+            @if (shell?.IsConfigure == true)
+            {
+                <a href="/">Menu</a>
+            }
+            else
+            {
+                <a href="/Configure">Configure</a>
+            }
+        </nav>
+    </header>
+
+    <main class="stage">
+        @RenderBody()
+    </main>
+
+    <nav class="categories" aria-label="Categories">
+        <ul>
+            @foreach (var category in categories)
+            {
+                <li><a href="/@category.Id" aria-current="@(category.Id == shell?.ActiveCategoryId ? "page" : null)">@category.Name</a></li>
+            }
+        </ul>
+    </nav>
+
+    @if (assistants.Count > 0)
+    {
+        @if (promptTarget is not null)
+        {
+            @* No JavaScript: each assistant icon is a submit button whose formaction sends ?q=<prompt>. *@
+            <form id="ask" class="ask" method="get" action="@promptTarget.Url" role="search">
+                <input name="q" type="search" autocomplete="off" aria-label="Ask an AI assistant"
+                       placeholder="Ask an assistant, then pick one →" />
+            </form>
+        }
+        <aside class="assistants" aria-label="AI assistants">
+            <ul>
+                @foreach (var assistant in assistants)
+                {
+                    <li>
+                        @if (assistant.AcceptsPrompt)
+                        {
+                            <button type="submit" form="ask" formaction="@assistant.Url" title="Ask @assistant.Name">
+                                <img src="/icons/assistants/@assistant.Icon" alt="@assistant.Name" width="28" height="28" />
+                            </button>
+                        }
+                        else
+                        {
+                            <a href="@assistant.Url" title="Open @assistant.Name">
+                                <img src="/icons/assistants/@assistant.Icon" alt="@assistant.Name" width="28" height="28" />
+                            </a>
+                        }
+                    </li>
+                }
+            </ul>
+        </aside>
+    }
+</body>
+</html>

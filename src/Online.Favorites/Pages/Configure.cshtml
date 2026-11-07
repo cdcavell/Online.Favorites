@@ -1,0 +1,150 @@
+@page
+@model ConfigureModel
+@{
+    var environments = Enum.GetValues<LinkEnvironment>();
+}
+
+<section class="panel config" aria-label="Favorites">
+    @if (Model.Error is not null)
+    {
+        <p class="flash" role="alert">@Model.Error</p>
+    }
+
+    <form method="post" asp-page-handler="AddCategory" class="row add">
+        <input name="name" required maxlength="@Category.NameMaxLength" placeholder="New category" aria-label="New category name" />
+        <button class="icon-btn" title="Add category">@Icon.Use("plus")</button>
+    </form>
+
+    @foreach (var category in Model.Tree)
+    {
+        <details class="node category" id="c-@category.Id" open="@(Model.OpenCategory == category.Id)">
+            <summary>
+                <span class="name">@category.Name</span>
+                <span class="count">@category.Sites.Count @(category.Sites.Count == 1 ? "site" : "sites")</span>
+            </summary>
+
+            <form method="post" class="row">
+                <input type="hidden" name="id" value="@category.Id" />
+                <input type="hidden" name="c" value="@category.Id" />
+                <input name="name" value="@category.Name" required maxlength="@Category.NameMaxLength" aria-label="Category name" />
+                <button class="icon-btn" asp-page-handler="RenameCategory" title="Save name">@Icon.Use("check")</button>
+                <button class="icon-btn" asp-page-handler="MoveCategory" name="delta" value="-1" formnovalidate title="Move up">@Icon.Use("up")</button>
+                <button class="icon-btn" asp-page-handler="MoveCategory" name="delta" value="1" formnovalidate title="Move down">@Icon.Use("down")</button>
+                <button class="icon-btn" type="button" popovertarget="del-c-@category.Id" title="Delete category">@Icon.Use("trash")</button>
+                <div class="confirm" popover id="del-c-@category.Id">
+                    <p>Delete <strong>@category.Name</strong> and its @category.Sites.Count @(category.Sites.Count == 1 ? "site" : "sites")?</p>
+                    <button class="danger" asp-page-handler="DeleteCategory" formnovalidate>Delete</button>
+                    <button type="button" popovertarget="del-c-@category.Id" popovertargetaction="hide">Cancel</button>
+                </div>
+            </form>
+
+            <div class="children">
+                @foreach (var site in category.Sites)
+                {
+                    var used = site.Links.Select(l => l.Environment).ToHashSet();
+                    var available = environments.Where(e => !used.Contains(e)).ToList();
+
+                    <details class="node site" id="s-@site.Id" open="@(Model.OpenSite == site.Id)">
+                        <summary>
+                            <span class="name">@site.Name</span>
+                            <span class="count">@string.Join(" · ", site.Links.Select(l => l.Environment))</span>
+                        </summary>
+
+                        <form method="post" class="row">
+                            <input type="hidden" name="id" value="@site.Id" />
+                            <input type="hidden" name="c" value="@category.Id" />
+                            <input type="hidden" name="s" value="@site.Id" />
+                            <input name="name" value="@site.Name" required maxlength="@Site.NameMaxLength" aria-label="Site name" />
+                            <button class="icon-btn" asp-page-handler="RenameSite" title="Save name">@Icon.Use("check")</button>
+                            <button class="icon-btn" asp-page-handler="MoveSite" name="delta" value="-1" formnovalidate title="Move up">@Icon.Use("up")</button>
+                            <button class="icon-btn" asp-page-handler="MoveSite" name="delta" value="1" formnovalidate title="Move down">@Icon.Use("down")</button>
+                            <button class="icon-btn" type="button" popovertarget="del-s-@site.Id" title="Delete site">@Icon.Use("trash")</button>
+                            <div class="confirm" popover id="del-s-@site.Id">
+                                <p>Delete <strong>@site.Name</strong> and its links?</p>
+                                <button class="danger" asp-page-handler="DeleteSite" formnovalidate>Delete</button>
+                                <button type="button" popovertarget="del-s-@site.Id" popovertargetaction="hide">Cancel</button>
+                            </div>
+                        </form>
+
+                        @foreach (var link in site.Links)
+                        {
+                            <form method="post" class="row link">
+                                <input type="hidden" name="siteId" value="@site.Id" />
+                                <input type="hidden" name="environment" value="@link.Environment" />
+                                <input type="hidden" name="c" value="@category.Id" />
+                                <input type="hidden" name="s" value="@site.Id" />
+                                <span class="env-label">@link.Environment</span>
+                                <input name="url" type="url" value="@link.Url" required maxlength="@SiteLink.UrlMaxLength" aria-label="@link.Environment URL" />
+                                <button class="icon-btn" asp-page-handler="SaveLink" title="Save URL">@Icon.Use("check")</button>
+                                <button class="icon-btn" asp-page-handler="DeleteLink" name="id" value="@link.Id" formnovalidate title="Remove @link.Environment link">@Icon.Use("trash")</button>
+                            </form>
+                        }
+
+                        @if (available.Count > 0)
+                        {
+                            <form method="post" asp-page-handler="SaveLink" class="row link add">
+                                <input type="hidden" name="siteId" value="@site.Id" />
+                                <input type="hidden" name="c" value="@category.Id" />
+                                <input type="hidden" name="s" value="@site.Id" />
+                                <select name="environment" aria-label="Environment">
+                                    @foreach (var environment in available)
+                                    {
+                                        <option value="@environment" selected="@(environment == LinkEnvironment.Public)">@environment</option>
+                                    }
+                                </select>
+                                <input name="url" type="url" required maxlength="@SiteLink.UrlMaxLength" placeholder="https://" aria-label="New link URL" />
+                                <button class="icon-btn" title="Add link">@Icon.Use("plus")</button>
+                            </form>
+                        }
+                    </details>
+                }
+
+                <form method="post" asp-page-handler="AddSite" class="row add">
+                    <input type="hidden" name="categoryId" value="@category.Id" />
+                    <input type="hidden" name="c" value="@category.Id" />
+                    <input name="name" required maxlength="@Site.NameMaxLength" placeholder="New site in @category.Name" aria-label="New site name" />
+                    <button class="icon-btn" title="Add site">@Icon.Use("plus")</button>
+                </form>
+            </div>
+        </details>
+    }
+</section>
+
+<section class="panel config" id="assistants" aria-label="AI assistants">
+    <details class="node category" open="@Model.OpenAssistants">
+        <summary>
+            <span class="name">AI assistants</span>
+            <span class="count">@Model.QuickLinks.Count shown on the right</span>
+        </summary>
+
+        <p class="hint">
+            Icons are SVG files in <code>wwwroot/icons/assistants</code>.
+            “Prompt” means the site accepts <code>?q=</code>, so the ask box can pass your question.
+        </p>
+
+        @foreach (var assistant in Model.QuickLinks)
+        {
+            <form method="post" class="row assistant">
+                <input type="hidden" name="id" value="@assistant.Id" />
+                <img src="/icons/assistants/@assistant.Icon" alt="" width="24" height="24" />
+                <input name="name" value="@assistant.Name" required maxlength="@QuickLink.NameMaxLength" aria-label="Name" />
+                <input name="url" type="url" value="@assistant.Url" required maxlength="@SiteLink.UrlMaxLength" aria-label="URL" />
+                <input name="icon" value="@assistant.Icon" required maxlength="@QuickLink.IconMaxLength" pattern="[a-z0-9][a-z0-9\-]*\.svg" aria-label="Icon file" />
+                <label class="check"><input type="checkbox" name="acceptsPrompt" value="true" checked="@assistant.AcceptsPrompt" /> Prompt</label>
+                <button class="icon-btn" asp-page-handler="SaveAssistant" title="Save">@Icon.Use("check")</button>
+                <button class="icon-btn" asp-page-handler="MoveAssistant" name="delta" value="-1" formnovalidate title="Move up">@Icon.Use("up")</button>
+                <button class="icon-btn" asp-page-handler="MoveAssistant" name="delta" value="1" formnovalidate title="Move down">@Icon.Use("down")</button>
+                <button class="icon-btn" asp-page-handler="DeleteAssistant" formnovalidate title="Remove">@Icon.Use("trash")</button>
+            </form>
+        }
+
+        <form method="post" asp-page-handler="AddAssistant" class="row assistant add">
+            <span class="icon-slot"></span>
+            <input name="name" required maxlength="@QuickLink.NameMaxLength" placeholder="Name" aria-label="Name" />
+            <input name="url" type="url" required maxlength="@SiteLink.UrlMaxLength" placeholder="https://" aria-label="URL" />
+            <input name="icon" required maxlength="@QuickLink.IconMaxLength" pattern="[a-z0-9][a-z0-9\-]*\.svg" placeholder="name.svg" aria-label="Icon file" />
+            <label class="check"><input type="checkbox" name="acceptsPrompt" value="true" /> Prompt</label>
+            <button class="icon-btn" title="Add assistant">@Icon.Use("plus")</button>
+        </form>
+    </details>
+</section>

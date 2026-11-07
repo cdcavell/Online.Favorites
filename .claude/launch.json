@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Online.Favorites",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": ["run", "--project", "src/Online.Favorites", "--launch-profile", "https"],
+      "port": 7297,
+      "url": "https://localhost:7297"
+    }
+  ]
+}

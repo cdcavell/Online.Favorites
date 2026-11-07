@@ -1,0 +1,13 @@
+﻿@page
+@model ErrorModel
+
+<section class="panel">
+    <p class="empty">
+        @(Model.ErrorCode == 404 ? "That page doesn't exist." : "Something went wrong.")
+        <a href="/">Back to the menu</a>
+    </p>
+    @if (Model.ErrorCode != 404 && Model.RequestId is not null)
+    {
+        <p class="muted small">Request ID: <code>@Model.RequestId</code></p>
+    }
+</section>
