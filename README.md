@@ -107,6 +107,12 @@ background.
 The jackdaw background and logo come from Customizable.Menu. The background is resized to a 100 KB
 WebP. The look is recreated in `site.css`, and none of the Kitzu template's files are used.
 
+## Security and CI
+
+Report vulnerabilities privately as described in [SECURITY.md](SECURITY.md). GitHub Actions run CI
+(locked restore, build, format check, tests), OWASP Dependency-Check, OpenSSF Scorecard, and workflow
+linting (zizmor, actionlint). Dependabot proposes NuGet and Actions updates weekly.
+
 ## License
 
 [MIT](LICENSE)

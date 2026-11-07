@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    False positives reported by OWASP Dependency-Check (.github/workflows/owasp-dependency-check.yml).
+    Add one <suppress> per false positive: name the package by packageUrl, name exactly one CVE,
+    and explain in <notes> why it does not apply, so any other CVE stays visible.
+-->
+<suppressions
+    xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.4.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.4.xsd
+        https://dependency-check.github.io/DependencyCheck/dependency-suppression.1.4.xsd">
+</suppressions>
