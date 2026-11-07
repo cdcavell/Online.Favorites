@@ -110,7 +110,8 @@ WebP. The look is recreated in `site.css`, and none of the Kitzu template's file
 ## Security and CI
 
 Report vulnerabilities privately as described in [SECURITY.md](SECURITY.md). GitHub Actions run CI
-(locked restore, build, format check, tests), OWASP Dependency-Check, OpenSSF Scorecard, and workflow
+(locked restore, build, format check, tests), CodeQL (C#, JavaScript, Actions), OWASP Dependency-Check,
+OpenSSF Scorecard, and workflow
 linting (zizmor, actionlint). Dependabot proposes NuGet and Actions updates weekly.
 
 ## License
