@@ -43,7 +43,8 @@ if ($listener) {
 & (Join-Path $PSScriptRoot 'New-LocalhostCertificate.ps1')
 
 Write-Host "Publishing to $InstallDir..."
-dotnet publish $project -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o $InstallDir
+# The win-x64 single-file restore differs from CI's, so don't let it rewrite packages.lock.json.
+dotnet publish $project -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:RestorePackagesWithLockFile=false -o $InstallDir
 if ($LASTEXITCODE -ne 0) { throw 'dotnet publish failed.' }
 
 if ($Port -ne 443) {

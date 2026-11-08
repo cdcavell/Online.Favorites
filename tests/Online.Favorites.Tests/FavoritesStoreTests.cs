@@ -110,12 +110,25 @@ public sealed class FavoritesStoreTests
 
     [Theory]
     [InlineData("../secret.svg")]
+    [InlineData("sub/icon.svg")]
+    [InlineData(@"sub\icon.svg")]
+    [InlineData(".hidden.svg")]
     [InlineData("icon.png")]
-    [InlineData("Claude.svg")]
     public async Task Assistant_icons_must_be_plain_svg_file_names(string icon)
     {
         using var t = new TestDatabase();
         await Assert.ThrowsAsync<FavoritesValidationException>(() =>
             t.Store.AddQuickLinkAsync("Test", "https://example.com/", false, icon));
+    }
+
+    [Theory]
+    [InlineData("githubcopilot.svg")]
+    [InlineData("OpenAI-black-monoblossom.svg")]
+    [InlineData("meta_ai.v2.svg")]
+    public async Task Assistant_icons_accept_ordinary_file_names(string icon)
+    {
+        using var t = new TestDatabase();
+        await t.Store.AddQuickLinkAsync("Test", "https://example.com/", false, icon);
+        Assert.Contains(await t.Store.GetQuickLinksAsync(), q => q.Icon == icon);
     }
 }

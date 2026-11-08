@@ -55,6 +55,7 @@ app.UseSecurityHeaders();
 app.UseRouting();
 app.UseOutputCache();
 
+app.UseAssistantIcons();
 app.MapStaticAssets();
 app.MapRazorPages().WithStaticAssets();
 

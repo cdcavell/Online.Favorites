@@ -98,9 +98,12 @@ page. Pressing Enter in the ask box uses the first prompt-capable assistant.
 These `?q=` behaviors aren't official APIs and can change. If one stops pre-filling, untick **Prompt**.
 
 The icons in `wwwroot/icons/assistants` are simple stand-in marks drawn for this project. To use
-official logos, drop an SVG with the same file name into that folder. Simple Icons
-(https://simpleicons.org, CC0) has most of them; give them a light fill so they show on the dark
-background.
+official logos, drop any SVG into that folder (in the installed copy that's
+`C:\Program Files\Online.Favorites\wwwroot\icons\assistants`), then enter its file name in the
+assistant's **Icon file** box on Configure. No rebuild or restart is needed. Simple Icons
+(https://simpleicons.org, CC0) has most of them. Every icon is tinted the same light shade, so black
+or colored SVGs work as they are. File names may use letters, digits, `.`, `_` and `-`.
+Re-running `Install-Service.ps1` keeps icons you added.
 
 ## Assets
 

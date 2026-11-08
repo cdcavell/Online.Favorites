@@ -246,6 +246,10 @@ details[open]::details-content { block-size: auto; }
 .assistants button:hover { background: rgb(255 255 255 / 0.12); transform: scale(1.08); }
 .assistants img { display: block; }
 
+/* Any assistant icon (ours, or a black Simple Icons / brand SVG dropped in) shows as one light shade. */
+.assistants img,
+.assistant img { filter: brightness(0) invert(.9); }
+
 .ask { grid-area: ask; }
 .ask input {
     width: 100%;
@@ -365,15 +369,17 @@ details[open]::details-content { block-size: auto; }
 }
 .row { position: relative; }
 
-.assistant img,
+.assistant .icon-tile,
 .assistant .icon-slot {
     flex: none;
+    display: grid;
+    place-items: center;
     width: 2rem;
     height: 2rem;
-    padding: .25rem;
     border-radius: var(--radius-sm);
     background: rgb(40 56 35 / 0.8);
 }
+.assistant .icon-tile img { display: block; }
 .assistant input[name="name"] { flex-basis: 6rem; }
 .assistant input[name="icon"] { flex: 0 1 9rem; }
 .check {

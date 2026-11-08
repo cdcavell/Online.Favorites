@@ -37,6 +37,31 @@ internal static class DatabaseSetup
     }
 }
 
+internal static class AssistantIcons
+{
+    public const string RequestPath = "/icons/assistants";
+
+    /// <summary>
+    /// Serves wwwroot/icons/assistants straight from disk. MapStaticAssets only knows files that existed
+    /// at build time, so an SVG dropped into the installed folder later would otherwise be a 404.
+    /// "no-cache" makes the browser revalidate, so replacing an icon shows up on the next load.
+    /// </summary>
+    public static IApplicationBuilder UseAssistantIcons(this WebApplication app)
+    {
+        // WebRootPath can be null (e.g. depending on how the content root was given), so fall back to it explicitly.
+        var webRoot = app.Environment.WebRootPath ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot");
+        var folder = Path.Combine(webRoot, "icons", "assistants");
+        Directory.CreateDirectory(folder);
+
+        return app.UseStaticFiles(new StaticFileOptions
+        {
+            RequestPath = RequestPath,
+            FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(folder),
+            OnPrepareResponse = context => context.Context.Response.Headers.CacheControl = "no-cache",
+        });
+    }
+}
+
 internal static class LocalhostCertificate
 {
     public const string FriendlyName = "Online.Favorites";
