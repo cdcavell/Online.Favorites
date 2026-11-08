@@ -26,26 +26,50 @@ $repo = Split-Path $PSScriptRoot -Parent
 $project = Join-Path $repo 'src\Online.Favorites\Online.Favorites.csproj'
 $exe = Join-Path $InstallDir 'Online.Favorites.exe'
 
+& (Join-Path $PSScriptRoot 'New-LocalhostCertificate.ps1')
+
+# Build first, into a staging folder, while any installed version keeps running.
+# A failed build therefore never stops or touches the working service.
+$staging = Join-Path $env:TEMP 'Online.Favorites.publish'
+Remove-Item $staging -Recurse -Force -ErrorAction SilentlyContinue
+Write-Host 'Publishing...'
+# The win-x64 single-file restore differs from CI's, so it keeps its own lock file
+# instead of rewriting the repository's packages.lock.json.
+$publishLockFile = Join-Path $env:TEMP 'Online.Favorites.publish.lock.json'
+dotnet publish $project -c Release -r win-x64 --self-contained -p:PublishSingleFile=true "-p:NuGetLockFilePath=$publishLockFile" -o $staging
+if ($LASTEXITCODE -ne 0) { throw 'dotnet publish failed. The installed service was not changed.' }
+
 $service = Get-Service $serviceName -ErrorAction SilentlyContinue
-if ($service -and $service.Status -ne 'Stopped') {
+$wasRunning = $service -and $service.Status -ne 'Stopped'
+if ($wasRunning) {
     Write-Host 'Stopping the running service...'
     Stop-Service $serviceName
     $service.WaitForStatus('Stopped', [TimeSpan]::FromSeconds(30))
 }
 
-# IIS (and anything else using http.sys) shows up as the System process, PID 4.
-$listener = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
-if ($listener) {
-    $owner = if ($listener.OwningProcess -eq 4) { 'IIS / http.sys (System)' } else { (Get-Process -Id $listener.OwningProcess).ProcessName }
-    throw "Port $Port is already in use by $owner. Remove the IIS https binding for localhost (IIS Manager > Sites > Bindings) or stop that site, then run this again."
+try {
+    # IIS (and anything else using http.sys) shows up as the System process, PID 4.
+    $listener = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($listener) {
+        $owner = if ($listener.OwningProcess -eq 4) { 'IIS / http.sys (System)' } else { (Get-Process -Id $listener.OwningProcess).ProcessName }
+        throw "Port $Port is already in use by $owner. Remove the IIS https binding for localhost (IIS Manager > Sites > Bindings) or stop that site, then run this again."
+    }
+
+    # Copy over the old version. Files you added (such as icons) are kept.
+    Write-Host "Installing to $InstallDir..."
+    New-Item -ItemType Directory -Force $InstallDir | Out-Null
+    Copy-Item (Join-Path $staging '*') $InstallDir -Recurse -Force
 }
-
-& (Join-Path $PSScriptRoot 'New-LocalhostCertificate.ps1')
-
-Write-Host "Publishing to $InstallDir..."
-# The win-x64 single-file restore differs from CI's, so don't let it rewrite packages.lock.json.
-dotnet publish $project -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:RestorePackagesWithLockFile=false -o $InstallDir
-if ($LASTEXITCODE -ne 0) { throw 'dotnet publish failed.' }
+catch {
+    if ($wasRunning) {
+        Write-Warning 'Install failed; restarting the previous version.'
+        Start-Service $serviceName
+    }
+    throw
+}
+finally {
+    Remove-Item $staging -Recurse -Force -ErrorAction SilentlyContinue
+}
 
 if ($Port -ne 443) {
     # appsettings.Production.json overrides appsettings.json and survives republishing only if you keep it.
