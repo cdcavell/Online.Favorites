@@ -31,13 +31,14 @@ internal static partial class Validate
     {
         var text = Text(value, QuickLink.IconMaxLength, "Icon file");
         if (!IconFilePattern().IsMatch(text))
-            throw new FavoritesValidationException("Icon file must be a simple name like \"claude.svg\" in wwwroot/icons/assistants.");
+            throw new FavoritesValidationException("Icon file must be an .svg file name (letters, digits, '.', '_' or '-', no folders) in wwwroot/icons/assistants.");
         return text;
     }
 
     public static LinkEnvironment Environment(LinkEnvironment value) =>
         Enum.IsDefined(value) ? value : throw new FavoritesValidationException("Unknown environment.");
 
-    [GeneratedRegex(@"^[a-z0-9][a-z0-9-]*\.svg$")]
+    // No slashes and no leading dot, so the name can only point at a file inside the icons folder.
+    [GeneratedRegex(@"^[A-Za-z0-9][A-Za-z0-9._-]*\.svg$")]
     private static partial Regex IconFilePattern();
 }

@@ -127,10 +127,10 @@
         {
             <form method="post" class="row assistant" data-autosave>
                 <input type="hidden" name="id" value="@assistant.Id" />
-                <img src="/icons/assistants/@assistant.Icon" alt="" width="24" height="24" />
+                <span class="icon-tile"><img src="/icons/assistants/@assistant.Icon" alt="" width="20" height="20" /></span>
                 <input name="name" value="@assistant.Name" required maxlength="@QuickLink.NameMaxLength" aria-label="Name" />
                 <input name="url" type="url" value="@assistant.Url" required maxlength="@SiteLink.UrlMaxLength" aria-label="URL" />
-                <input name="icon" value="@assistant.Icon" required maxlength="@QuickLink.IconMaxLength" pattern="[a-z0-9][a-z0-9\-]*\.svg" aria-label="Icon file" />
+                <input name="icon" value="@assistant.Icon" required maxlength="@QuickLink.IconMaxLength" pattern="[A-Za-z0-9][A-Za-z0-9._\-]*\.svg" aria-label="Icon file" />
                 <label class="check"><input type="checkbox" name="acceptsPrompt" value="true" checked="@assistant.AcceptsPrompt" /> Prompt</label>
                 <button class="default-submit" asp-page-handler="SaveAssistant" tabindex="-1" aria-hidden="true">Save</button>
                 <button class="icon-btn" asp-page-handler="MoveAssistant" name="delta" value="-1" formnovalidate title="Move up">@Icon.Use("up")</button>
@@ -143,7 +143,7 @@
             <span class="icon-slot"></span>
             <input name="name" required maxlength="@QuickLink.NameMaxLength" placeholder="Name" aria-label="Name" />
             <input name="url" type="url" required maxlength="@SiteLink.UrlMaxLength" placeholder="https://" aria-label="URL" />
-            <input name="icon" required maxlength="@QuickLink.IconMaxLength" pattern="[a-z0-9][a-z0-9\-]*\.svg" placeholder="name.svg" aria-label="Icon file" />
+            <input name="icon" required maxlength="@QuickLink.IconMaxLength" pattern="[A-Za-z0-9][A-Za-z0-9._\-]*\.svg" placeholder="name.svg" aria-label="Icon file" />
             <label class="check"><input type="checkbox" name="acceptsPrompt" value="true" /> Prompt</label>
             <button class="icon-btn" title="Add assistant">@Icon.Use("plus")</button>
         </form>
